@@ -14,7 +14,7 @@ openai_client = openai.Client(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Retrieve the assistant you want to use
 assistant = openai_client.beta.assistants.retrieve(
-    "asst_CQQ5wv7Epw5W5RKBeXHcukqb"
+    "asst_lDlJUxCSuHNrmwQQhtuLAiGh"
 )
 
 # Create the title and subheader for the Streamlit page
@@ -23,7 +23,7 @@ st.subheader("ask a question")
 
 
 
-thread = "thread_OXs4M41JjF3N2s3yhxDUAwkY"
+thread = "thread_qAQx7zSPmINgZnR2ocdMELYf"
 placeholder ="placeholder"
 
 question = st.text_input(
