@@ -20,25 +20,41 @@ send_button = st.button("Send")
 
 if send_button and question:
     with st.spinner("Starting work..."):
-        
+
         file_id = None
         if uploaded_file is not None:
-            # Upload the file and get its ID
+            # Assume there's a method to upload the file and get a file ID
             file_response = openai.File.create(file=uploaded_file)
-            file_id = file_response.id
+            file_id = file_response['id']
         
-        # Send message with question and file attachment (if present)
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "User uploads a file and asks a question."},
-                {"role": "user", "content": question + (f" - See attached file ID: {file_id}" if file_id else "")}
-            ]
+        # Create a new message with or without a file ID
+        content = question + (f"\nAttached file ID: {file_id}" if file_id else "")
+        
+        # Send the message to the assistant
+        message_response = openai.Assistant.create_message(
+            assistant_id="asst_lDlJUxCSuHNrmwQQhtuLAiGh",
+            thread_id="thread_qAQx7zSPmINgZnR2ocdMELYf",
+            message={
+                "role": "user",
+                "content": content
+            }
         )
-        
-        # Display the response from the OpenAI model
-        answer = response.choices[0].message['content']
-        st.markdown(answer)
+
+        # Poll for the completion of the assistant's response
+        run = openai.Assistant.create_run(
+            assistant_id="asst_lDlJUxCSuHNrmwQQhtuLAiGh",
+            message_id=message_response['id']
+        )
+
+        while run['status'] != "completed":
+            time.sleep(5)
+            run = openai.Assistant.retrieve_run(run_id=run['id'])
+
+        # Display the assistant's response
+        response_message = openai.Assistant.retrieve_message(
+            message_id=run['final_message_id']
+        )
+        st.markdown(response_message['content'])
 # import openai
 # import streamlit as st
 # import os
