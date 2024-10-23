@@ -6,51 +6,39 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Create an OpenAI client with your API key
+# API key
 api_key = st.secrets["OPENAI_API_KEY"]
 openai.api_key = api_key
 
-# Create the title and subheader for the Streamlit page
+# Streamlit UI
 st.title("Let's get this over with")
 st.subheader("Ask a question")
-
-thread_id = "thread_qAQx7zSPmINgZnR2ocdMELYf"
 
 question = st.text_input("Put your question here", placeholder="Put your text here")
 uploaded_file = st.file_uploader("Choose a file to upload", type=["txt", "csv", "pdf", "docx"])
 send_button = st.button("Send")
 
-# Check if send button is clicked
 if send_button and question:
     with st.spinner("Starting work..."):
         
         file_id = None
         if uploaded_file is not None:
-            # Pass the file to the API and get its unique file ID
+            # Upload the file and get its ID
             file_response = openai.File.create(file=uploaded_file)
-            file_id = file_response['id']
+            file_id = file_response.id
         
-        # Create a new thread with a message, attaching the uploaded file's ID
-        additional_content = f" - File ID: {file_id}" if file_id else ""
-        message_content = question + additional_content
-
-        message = openai.ThreadMessage.create(
-            thread_id=thread_id, sender_type="user", content=message_content
+        # Send message with question and file attachment (if present)
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "User uploads a file and asks a question."},
+                {"role": "user", "content": question + (f" - See attached file ID: {file_id}" if file_id else "")}
+            ]
         )
-
-        # Create a run with the new thread
-        run = openai.ThreadRun.create(thread_id=thread_id, assistant_id=assistant.id)
-
-        # Check periodically whether the run is done
-        while run.status != "completed":
-            time.sleep(5)
-            run = openai.ThreadRun.retrieve(thread_id=thread_id, run_id=run.id)
-
-        # Retrieve messages once the run is complete
-        messages = openai.ThreadMessage.list(thread_id=thread_id)
-        for msg in messages['data']:
-            st.markdown(msg['content'])
-
+        
+        # Display the response from the OpenAI model
+        answer = response.choices[0].message['content']
+        st.markdown(answer)
 # import openai
 # import streamlit as st
 # import os
