@@ -18,7 +18,7 @@ assistant = openai_client.beta.assistants.retrieve(
 )
 
 # Create the title and subheader for the Streamlit page
-st.title("Welcome to the hackathon")
+st.title("Let's get this over with")
 st.subheader("ask a question")
 
 
