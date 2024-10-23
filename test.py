@@ -31,7 +31,7 @@ if send_button and question:
         content = question + (f"\nAttached file ID: {file_id}" if file_id else "")
         
         # Send the message to the assistant
-        message_response = openai.Assistant.create_message(
+        message_response = openai.beta.assistant.create.message(
             assistant_id="asst_lDlJUxCSuHNrmwQQhtuLAiGh",
             thread_id="thread_qAQx7zSPmINgZnR2ocdMELYf",
             message={
@@ -41,17 +41,17 @@ if send_button and question:
         )
 
         # Poll for the completion of the assistant's response
-        run = openai.Assistant.create_run(
+        run = openai.beta.assistant.run.create(
             assistant_id="asst_lDlJUxCSuHNrmwQQhtuLAiGh",
             message_id=message_response['id']
         )
 
         while run['status'] != "completed":
             time.sleep(5)
-            run = openai.Assistant.retrieve_run(run_id=run['id'])
+            run = openai.beta.assistant.run.retrieve(run_id=run['id'])
 
         # Display the assistant's response
-        response_message = openai.Assistant.retrieve_message(
+        response_message = openai.beta.assistant.messages.retrieve(
             message_id=run['final_message_id']
         )
         st.markdown(response_message['content'])
